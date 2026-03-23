@@ -1,10 +1,11 @@
 from src.spotify_client import SpotifyClient
 from src.recommender import recommend_songs
+from src.cover_generator import generate_cover
 
 
 def build_playlist(spotify: SpotifyClient, user_input: str):
     print("\nConsultando IA para montar a playlist...")
-    recommendations = recommend_songs(user_input)
+    title, genre, recommendations = recommend_songs(user_input)
 
     if not recommendations:
         print("Erro: IA nao retornou recomendacoes.")
@@ -30,11 +31,15 @@ def build_playlist(spotify: SpotifyClient, user_input: str):
         print("\nNenhuma musica encontrada no Spotify.")
         return None
 
-    artists = ", ".join(dict.fromkeys(t["artist"] for t in found_tracks[:3]))
-    playlist_name = f"SpotifyBot: {artists} e mais"
-    track_uris = [t["uri"] for t in found_tracks]
+    if not title:
+        artists = ", ".join(dict.fromkeys(t["artist"] for t in found_tracks[:3]))
+        title = f"{artists} e mais"
 
-    print(f"\nCriando playlist '{playlist_name}' com {len(found_tracks)} musicas...")
-    url = spotify.create_playlist(playlist_name, track_uris)
+    print(f"\nGerando capa da playlist...")
+    cover = generate_cover(genre, title)
+
+    track_uris = [t["uri"] for t in found_tracks]
+    print(f"Criando playlist '{title}' com {len(found_tracks)} musicas...")
+    url = spotify.create_playlist(title, track_uris, cover_base64=cover)
     print(f"\nPlaylist criada! {url}")
     return url

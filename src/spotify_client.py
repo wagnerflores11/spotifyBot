@@ -46,13 +46,19 @@ class SpotifyClient:
             return result
         return self._search(f"{name} {artist}")
 
-    def create_playlist(self, name, track_uris):
-        user_id = self.get_user_id()
-        playlist = self.sp.user_playlist_create(user_id, name, public=False)
+    def create_playlist(self, name, track_uris, cover_base64=None):
+        payload = {"name": name, "public": False, "description": "Criada pelo SpotifyBot"}
+        response = self.sp._post("me/playlists", payload=payload)
+        playlist_id = response["id"]
+        if cover_base64:
+            try:
+                self.sp.playlist_upload_cover_image(playlist_id, cover_base64)
+            except Exception:
+                print("  Aviso: nao foi possivel definir a capa da playlist.")
         for i in range(0, len(track_uris), SPOTIFY_BATCH_ADD):
             batch = track_uris[i:i + SPOTIFY_BATCH_ADD]
-            self.sp.playlist_add_items(playlist["id"], batch)
-        return playlist["external_urls"]["spotify"]
+            self.sp.playlist_add_items(playlist_id, batch)
+        return response["external_urls"]["spotify"]
 
     def _search(self, query):
         results = self.sp.search(q=query, type="track", limit=1)
