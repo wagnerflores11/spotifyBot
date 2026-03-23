@@ -12,7 +12,8 @@ SPOTIFY_SCOPES = (
     "user-library-read "
     "user-library-modify "
     "playlist-modify-public "
-    "playlist-modify-private"
+    "playlist-modify-private "
+    "ugc-image-upload"
 )
 
 MAX_PLAYLIST_SIZE = 50
