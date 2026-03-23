@@ -5,7 +5,7 @@ from src.cover_generator import generate_cover
 
 def build_playlist(spotify: SpotifyClient, user_input: str):
     print("\nConsultando IA para montar a playlist...")
-    title, genre, recommendations = recommend_songs(user_input)
+    genre, recommendations = recommend_songs(user_input)
 
     if not recommendations:
         print("Erro: IA nao retornou recomendacoes.")
@@ -31,9 +31,7 @@ def build_playlist(spotify: SpotifyClient, user_input: str):
         print("\nNenhuma musica encontrada no Spotify.")
         return None
 
-    if not title:
-        artists = ", ".join(dict.fromkeys(t["artist"] for t in found_tracks[:3]))
-        title = f"{artists} e mais"
+    title = f"DJ Waguinho - {genre}" if genre else "DJ Waguinho"
 
     print(f"\nGerando capa da playlist...")
     cover = generate_cover(genre, title)
