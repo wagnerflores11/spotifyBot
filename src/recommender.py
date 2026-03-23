@@ -4,45 +4,47 @@ from src.config import OPENAI_API_KEY, MAX_PLAYLIST_SIZE
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-SYSTEM_PROMPT = f"""Voce e um curador musical brasileiro especialista em montar playlists coesas.
+SYSTEM_PROMPT = f"""Voce e um curador musical especialista em montar playlists coesas.
 
 TAREFA:
 O usuario vai descrever 3 musicas de referencia. Voce deve montar uma playlist de EXATAMENTE {MAX_PLAYLIST_SIZE} musicas.
 
-PASSO 1 — Identifique o SUBGENERO EXATO das 3 musicas.
-Nao use generos amplos como "brasileiro" ou "nacional".
-Exemplos de subgeneros validos:
-- Rap romantico BR (Hungria, Orochi, Mc Pedrinho)
-- Trap BR (Veigh, Matuê, Yunk Vino)
-- Rap consciente BR (Emicida, Djonga, Racionais)
-- Funk melody (Mc Kevinho, Livinho)
-- Funk ostentacao (Mc IG, Mc Ryan SP)
-- Sertanejo universitario (Gusttavo Lima, Henrique e Juliano)
-- Pagode (Menos e Mais, Thiaguinho)
-- Pop BR (Anitta, Ludmilla)
+PASSO 1 — Interprete as 3 musicas do usuario:
+- O usuario pode errar a grafia dos nomes. CORRIJA automaticamente. Exemplos:
+  - "sweater wather the neighbourd" → Sweater Weather - The Neighbourhood
+  - "hungria amor e fe" → Amor e Fe - Hungria Hip Hop
+  - "maron5 payphone" → Payphone - Maroon 5
+  - "bihliee aish bad guy" → bad guy - Billie Eilish
+- Identifique o SUBGENERO EXATO (ex: "pop internacional", "trap BR", "rap romantico BR", "R&B", "indie rock", "sertanejo universitario")
+- Identifique a ORIGEM/IDIOMA (ex: "internacional/ingles", "brasileiro/portugues")
 
-PASSO 2 — Monte a playlist com {MAX_PLAYLIST_SIZE} musicas que sejam TODAS do subgenero identificado.
+PASSO 2 — Verifique se o usuario PEDIU EXPLICITAMENTE para misturar generos ou ser aleatorio.
+- Se o usuario escreveu algo como "mistura", "aleatorio", "variado", "de tudo" → pode misturar generos livremente.
+- Se NAO pediu isso → TODAS as musicas devem ser do MESMO subgenero e idioma. ZERO excecoes.
 
-PASSO 3 — Crie um titulo criativo para a playlist que combine com o estilo musical. Exemplos:
-- Para rap romantico: "Noites de Rap & Sentimento"
-- Para trap: "Trap Session BR"
-- Para funk: "Baile do Momento"
-NAO use "SpotifyBot" no titulo.
+PASSO 3 — Monte a playlist com {MAX_PLAYLIST_SIZE} musicas seguindo a regra do passo 2.
 
 REGRAS ABSOLUTAS — QUEBRE QUALQUER UMA E A RESPOSTA SERA DESCARTADA:
-1. TODAS as {MAX_PLAYLIST_SIZE} musicas DEVEM ser do MESMO subgenero. ZERO excecoes.
-2. Se as referencias sao rap/trap, PROIBIDO incluir: pagode, sertanejo, MPB, pop, funk, forro, axe, reggae.
-3. Se as referencias sao sertanejo, PROIBIDO incluir: rap, trap, funk, pagode, MPB, pop.
-4. PROIBIDO repetir a mesma musica.
-5. PROIBIDO incluir versoes "Ao Vivo", "Acustico", "feat.", "Remix".
-6. Apenas musicas REAIS que existem no Spotify.
-7. Priorize musicas populares e conhecidas dos artistas.
-8. Inclua as 3 musicas originais + outras dos mesmos artistas + artistas SIMILARES do MESMO subgenero.
+1. Se o usuario NAO pediu mistura: TODAS as {MAX_PLAYLIST_SIZE} musicas DEVEM ser do MESMO subgenero e idioma.
+2. Se as referencias sao em INGLES, PROIBIDO incluir musicas em portugues, espanhol ou qualquer outro idioma.
+3. Se as referencias sao BRASILEIRAS, PROIBIDO incluir musicas internacionais.
+4. Se as referencias sao pop, PROIBIDO incluir rap, trap, funk, sertanejo, pagode, MPB, forro, axe.
+5. Se as referencias sao rap/trap, PROIBIDO incluir pop, sertanejo, pagode, funk, MPB.
+6. PROIBIDO repetir a mesma musica.
+7. PROIBIDO incluir versoes "Ao Vivo", "Acustico", "feat.", "Remix", "Deluxe".
+8. Apenas musicas REAIS que existem no Spotify.
+9. Priorize musicas populares e conhecidas.
+10. Inclua as 3 musicas originais + outras dos mesmos artistas + artistas SIMILARES do MESMO subgenero e idioma.
 
-ANTES DE RESPONDER: releia cada musica da lista e confirme mentalmente que ela pertence ao subgenero identificado. Se tiver duvida sobre alguma, REMOVA e substitua.
+EXEMPLOS DE COERENCIA:
+- Justin Timberlake + Maroon 5 + Ariana Grande = Pop internacional. Sugestoes: Ed Sheeran, Bruno Mars, Dua Lipa, The Weeknd, Taylor Swift. NAO Anitta, Cazuza, IZA.
+- Veigh + Hungria + Orochi = Rap/Trap BR. Sugestoes: MC Poze, L7nnon, Filipe Ret. NAO Justin Bieber, pagode, sertanejo.
+- Gusttavo Lima + Henrique e Juliano = Sertanejo. Sugestoes: Jorge e Mateus, Marilia Mendonca. NAO rap, pop internacional.
+
+ANTES DE RESPONDER: releia CADA musica da lista e confirme que ela e do MESMO subgenero E idioma das 3 referencias. Se tiver duvida, REMOVA e substitua.
 
 Responda APENAS com JSON. Use nomes curtos e limpos:
-{{"title": "Titulo Criativo", "genre": "subgenero", "songs": [{{"name": "Nome", "artist": "Artista"}}, ...]}}"""
+{{"genre": "subgenero identificado", "songs": [{{"name": "Nome", "artist": "Artista"}}, ...]}}"""
 
 
 def _fix_truncated_json(raw):
@@ -76,16 +78,13 @@ def recommend_songs(user_input):
         data = json.loads(raw)
 
     if not isinstance(data, dict):
-        return "", "", []
+        return "", []
 
     genre = data.get("genre", "")
-    title = data.get("title", "")
     songs = data.get("songs", [])
 
     if genre:
         print(f"Genero identificado: {genre}")
-    if title:
-        print(f"Titulo da playlist: {title}")
 
     if not songs:
         for key in data:
@@ -93,4 +92,4 @@ def recommend_songs(user_input):
                 songs = data[key]
                 break
 
-    return title, genre, songs[:MAX_PLAYLIST_SIZE]
+    return genre, songs[:MAX_PLAYLIST_SIZE]
