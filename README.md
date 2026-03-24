@@ -2,18 +2,18 @@
 
 <p align="center">
   <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Primary_Logo_RGB_Green.png" width="200" alt="Spotify Logo"/>
-</p>p>
+</p>
 
 <p align="center">
-  <strong>Bot inteligente para gerenciar seu Spotify com IA</strong>strong>
-</p>p>
+  <strong>Bot inteligente para gerenciar seu Spotify com IA</strong>
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
-    <img src="https://img.shields.io/badge/Spotify-API-1DB954?style=for-the-badge&logo=spotify&logoColor=white"/>
-      <img src="https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=for-the-badge&logo=openai&logoColor=white"/>
-        <img src="https://img.shields.io/badge/asyncio-Busca_Paralela-FF6F00?style=for-the-badge&logo=python&logoColor=white"/>
-</p>p>
+  <img src="https://img.shields.io/badge/Spotify-API-1DB954?style=for-the-badge&logo=spotify&logoColor=white"/>
+  <img src="https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=for-the-badge&logo=openai&logoColor=white"/>
+  <img src="https://img.shields.io/badge/asyncio-Busca_Paralela-FF6F00?style=for-the-badge&logo=python&logoColor=white"/>
+</p>
 
 ---
 
@@ -50,107 +50,107 @@ Resultado: Playlist "DJ Waguinho - rap/trap BR" criada no seu Spotify!
 ### Pre-requisitos
 
 - Python 3.11+
-- - Conta no [Spotify Developer](https://developer.spotify.com/dashboard)
-  - - Chave da API [OpenAI](https://platform.openai.com/)
-    -
-    - ### 1. Clone o repositorio
-    -
-    - ```bash
-      git clone https://github.com/wagnerflores11/spotifyBot.git
-      cd spotifyBot
-      ```
+- Conta no [Spotify Developer](https://developer.spotify.com/dashboard)
+- Chave da API [OpenAI](https://platform.openai.com/)
 
-      ### 2. Instale as dependencias
+### 1. Clone o repositorio
 
-      ```bash
-      pip install -r requirements.txt
-      ```
+```bash
+git clone https://github.com/wagnerflores11/spotifyBot.git
+cd spotifyBot
+```
 
-      ### 3. Configure o `.env`
+### 2. Instale as dependencias
 
-      Crie um arquivo `.env` na raiz do projeto:
+```bash
+pip install -r requirements.txt
+```
 
-      ```env
-      SPOTIFY_CLIENT_ID=seu_client_id
-      SPOTIFY_CLIENT_SECRET=seu_client_secret
-      SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
-      OPENAI_API_KEY=sua_chave_openai
-      ```
+### 3. Configure o `.env`
 
-      ### 4. Configure o Spotify Developer
+Crie um arquivo `.env` na raiz do projeto:
 
-      1. Acesse [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-      2. 2. Crie um app
-         3. 3. Em **Redirect URIs**, adicione: `http://127.0.0.1:8888/callback`
-            4. 4. Copie o **Client ID** e **Client Secret** para o `.env`
-               5.
-               6. ---
-               7.
-               8. ## Uso
-               9.
-               10. ```bash
-                   python bot.py
-                   ```
+```env
+SPOTIFY_CLIENT_ID=seu_client_id
+SPOTIFY_CLIENT_SECRET=seu_client_secret
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
+OPENAI_API_KEY=sua_chave_openai
+```
 
-                   ```
-                   Autenticando no Spotify...
-                   Logado como: Wagner
+### 4. Configure o Spotify Developer
 
-                   ========================================
-                     SpotifyBot
-                   ========================================
-                     1. Criar playlist nova
-                     2. Adicionar musicas a uma playlist
-                     3. Minhas playlists
-                     4. Detalhes de uma playlist
-                     5. Duplicar playlist
-                     6. Exportar playlist para .txt
-                     7. Historico de playlists criadas
-                     8. Remover todas as musicas curtidas
-                     9. Sair
-                   ========================================
-                   Escolha uma opcao:
-                   ```
+1. Acesse [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+2. Crie um app
+3. Em **Redirect URIs**, adicione: `http://127.0.0.1:8888/callback`
+4. Copie o **Client ID** e **Client Secret** para o `.env`
 
-                   Na primeira execucao, o browser abre para voce autorizar o app no Spotify.
+---
 
-                   ---
+## Uso
 
-                   ## Estrutura do projeto
+```bash
+python bot.py
+```
 
-                   ```
-                   spotifyBot/
-                   ├── bot.py                    # CLI principal com menu interativo
-                   ├── src/
-                   │   ├── config.py             # Configuracoes, validacao e logging
-                   │   ├── models.py             # Dataclasses: Track, Playlist, Recommendation
-                   │   ├── exceptions.py         # Excecoes customizadas
-                   │   ├── spotify_client.py     # Autenticacao e operacoes Spotify
-                   │   ├── async_search.py       # Busca paralela com asyncio
-                   │   ├── recommender.py        # Recomendacao de musicas via OpenAI
-                   │   ├── cover_generator.py    # Geracao de capas via DALL-E 3
-                   │   ├── playlist_builder.py   # Orquestracao: IA -> busca -> cria playlist
-                   │   └── history.py            # Historico local e exportacao
-                   ├── requirements.txt
-                   ├── history.json              # Historico de playlists criadas (gerado automaticamente)
-                   └── .env                      # Credenciais (nao versionado)
-                   ```
+```
+Autenticando no Spotify...
+Logado como: Wagner
 
-                   ---
+========================================
+  SpotifyBot
+========================================
+  1. Criar playlist nova
+  2. Adicionar musicas a uma playlist
+  3. Minhas playlists
+  4. Detalhes de uma playlist
+  5. Duplicar playlist
+  6. Exportar playlist para .txt
+  7. Historico de playlists criadas
+  8. Remover todas as musicas curtidas
+  9. Sair
+========================================
+Escolha uma opcao:
+```
 
-                   ## Tecnologias
+Na primeira execucao, o browser abre para voce autorizar o app no Spotify.
 
-                   <p align="center">
-                     <img src="https://img.shields.io/badge/spotipy-SDK_Spotify-1DB954?style=flat-square&logo=spotify&logoColor=white"/>
-                       <img src="https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991?style=flat-square&logo=openai&logoColor=white"/>
-                         <img src="https://img.shields.io/badge/DALL--E_3-Capas-412991?style=flat-square&logo=openai&logoColor=white"/>
-                           <img src="https://img.shields.io/badge/asyncio-Busca_Paralela-3776AB?style=flat-square&logo=python&logoColor=white"/>
-                             <img src="https://img.shields.io/badge/python--dotenv-Env_Config-ECD53F?style=flat-square&logo=python&logoColor=black"/>
-                               <img src="https://img.shields.io/badge/Pillow-Imagens-3776AB?style=flat-square&logo=python&logoColor=white"/>
-                   </p>p>
-                   
-                   ---
+---
 
-                   ## Licenca
+## Estrutura do projeto
 
-                   Este projeto e de uso pessoal.</strong>
+```
+spotifyBot/
+├── bot.py                    # CLI principal com menu interativo
+├── src/
+│   ├── config.py             # Configuracoes, validacao e logging
+│   ├── models.py             # Dataclasses: Track, Playlist, Recommendation
+│   ├── exceptions.py         # Excecoes customizadas
+│   ├── spotify_client.py     # Autenticacao e operacoes Spotify
+│   ├── async_search.py       # Busca paralela com asyncio
+│   ├── recommender.py        # Recomendacao de musicas via OpenAI
+│   ├── cover_generator.py    # Geracao de capas via DALL-E 3
+│   ├── playlist_builder.py   # Orquestracao: IA -> busca -> cria playlist
+│   └── history.py            # Historico local e exportacao
+├── requirements.txt
+├── history.json              # Historico de playlists criadas (gerado automaticamente)
+└── .env                      # Credenciais (nao versionado)
+```
+
+---
+
+## Tecnologias
+
+<p align="center">
+  <img src="https://img.shields.io/badge/spotipy-SDK_Spotify-1DB954?style=flat-square&logo=spotify&logoColor=white"/>
+  <img src="https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991?style=flat-square&logo=openai&logoColor=white"/>
+  <img src="https://img.shields.io/badge/DALL--E_3-Capas-412991?style=flat-square&logo=openai&logoColor=white"/>
+  <img src="https://img.shields.io/badge/asyncio-Busca_Paralela-3776AB?style=flat-square&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/python--dotenv-Env_Config-ECD53F?style=flat-square&logo=python&logoColor=black"/>
+  <img src="https://img.shields.io/badge/Pillow-Imagens-3776AB?style=flat-square&logo=python&logoColor=white"/>
+</p>
+
+---
+
+## Licenca
+
+Este projeto e de uso pessoal.
