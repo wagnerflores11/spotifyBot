@@ -13,6 +13,7 @@ SPOTIFY_SCOPES = (
     "user-library-modify "
     "playlist-modify-public "
     "playlist-modify-private "
+    "playlist-read-private "
     "ugc-image-upload"
 )
 

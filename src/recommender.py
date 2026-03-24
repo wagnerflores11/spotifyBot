@@ -59,23 +59,35 @@ def _fix_truncated_json(raw):
 
 
 def recommend_songs(user_input):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Minhas 3 musicas: {user_input}"},
-        ],
-        temperature=0.2,
-        max_tokens=8192,
-        response_format={"type": "json_object"},
-    )
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": f"Minhas 3 musicas: {user_input}"},
+            ],
+            temperature=0.2,
+            max_tokens=8192,
+            response_format={"type": "json_object"},
+        )
+    except Exception as e:
+        print(f"Erro ao consultar IA: {e}")
+        return "", []
 
-    raw = response.choices[0].message.content.strip()
+    raw = (response.choices[0].message.content or "").strip()
+    if not raw:
+        print("IA retornou resposta vazia.")
+        return "", []
+
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
         raw = _fix_truncated_json(raw)
-        data = json.loads(raw)
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            print("Erro ao interpretar resposta da IA.")
+            return "", []
 
     if not isinstance(data, dict):
         return "", []
