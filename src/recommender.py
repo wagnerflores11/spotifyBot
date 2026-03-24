@@ -1,8 +1,27 @@
-import json
-from openai import OpenAI
-from src.config import OPENAI_API_KEY, MAX_PLAYLIST_SIZE
+"""Recomendação de músicas via OpenAI GPT."""
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+import json
+import logging
+from typing import Optional
+
+from openai import OpenAI
+
+from src.config import MAX_PLAYLIST_SIZE, OPENAI_API_KEY
+from src.exceptions import AIError
+from src.models import Recommendation
+
+logger = logging.getLogger(__name__)
+
+_client: Optional[OpenAI] = None
+
+
+def _get_client() -> OpenAI:
+    """Lazy init do client OpenAI."""
+    global _client
+    if _client is None:
+        _client = OpenAI(api_key=OPENAI_API_KEY)
+    return _client
+
 
 SYSTEM_PROMPT = f"""Voce e um curador musical especialista em montar playlists coesas.
 
@@ -47,20 +66,57 @@ Responda APENAS com JSON. Use nomes curtos e limpos:
 {{"genre": "subgenero identificado", "songs": [{{"name": "Nome", "artist": "Artista"}}, ...]}}"""
 
 
-def _fix_truncated_json(raw):
+def _fix_truncated_json(raw: str) -> str:
+    """Tenta corrigir JSON truncado pela API."""
     last_brace = raw.rfind("}")
     if last_brace == -1:
-        return '{"songs": []}'
-    truncated = raw[:last_brace + 1]
+        return '{"genre": "", "songs": []}'
+
+    truncated = raw[: last_brace + 1]
     last_bracket = truncated.rfind("]")
     if last_bracket == -1:
-        return '{"songs": []}'
-    return truncated[:last_bracket + 1] + "}"
+        return '{"genre": "", "songs": []}'
+
+    return truncated[: last_bracket + 1] + "}"
 
 
-def recommend_songs(user_input):
+def _parse_response(raw: str) -> Recommendation:
+    """Faz o parse da resposta JSON da IA, com fallback para JSON truncado."""
+    if not raw:
+        logger.warning("IA retornou resposta vazia")
+        return Recommendation(genre="")
+
     try:
-        response = client.chat.completions.create(
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        logger.warning("JSON invalido, tentando corrigir truncamento")
+        fixed = _fix_truncated_json(raw)
+        try:
+            data = json.loads(fixed)
+        except json.JSONDecodeError:
+            logger.error("Nao foi possivel interpretar a resposta da IA")
+            return Recommendation(genre="")
+
+    if not isinstance(data, dict):
+        return Recommendation(genre="")
+
+    genre = data.get("genre", "")
+    songs = data.get("songs", [])
+
+    # Fallback: procura a primeira lista no JSON
+    if not songs:
+        for value in data.values():
+            if isinstance(value, list):
+                songs = value
+                break
+
+    return Recommendation(genre=genre, songs=songs[:MAX_PLAYLIST_SIZE])
+
+
+def recommend_songs(user_input: str) -> Recommendation:
+    """Consulta a IA e retorna a recomendação de músicas."""
+    try:
+        response = _get_client().chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
@@ -70,38 +126,14 @@ def recommend_songs(user_input):
             max_tokens=8192,
             response_format={"type": "json_object"},
         )
-    except Exception as e:
-        print(f"Erro ao consultar IA: {e}")
-        return "", []
+    except Exception as exc:
+        raise AIError(f"Erro ao consultar IA: {exc}") from exc
 
     raw = (response.choices[0].message.content or "").strip()
-    if not raw:
-        print("IA retornou resposta vazia.")
-        return "", []
+    recommendation = _parse_response(raw)
 
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        raw = _fix_truncated_json(raw)
-        try:
-            data = json.loads(raw)
-        except json.JSONDecodeError:
-            print("Erro ao interpretar resposta da IA.")
-            return "", []
+    if recommendation.genre:
+        logger.info("Genero identificado: %s", recommendation.genre)
+    logger.info("IA sugeriu %d musicas", len(recommendation.songs))
 
-    if not isinstance(data, dict):
-        return "", []
-
-    genre = data.get("genre", "")
-    songs = data.get("songs", [])
-
-    if genre:
-        print(f"Genero identificado: {genre}")
-
-    if not songs:
-        for key in data:
-            if isinstance(data[key], list):
-                songs = data[key]
-                break
-
-    return genre, songs[:MAX_PLAYLIST_SIZE]
+    return recommendation
