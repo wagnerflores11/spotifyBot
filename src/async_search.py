@@ -1,8 +1,8 @@
 """Busca paralela de faixas no Spotify usando asyncio.
 
-Em vez de buscar uma música por vez (sequencial ~75s para 50 músicas),
-dispara várias buscas simultâneas em lotes controlados por um semáforo.
-Com 5 buscas paralelas, o tempo cai para ~15s.
+Usa concorrência controlada (ASYNC_CONCURRENCY=2) para respeitar o rate
+limit do Spotify no plano de desenvolvimento (~60 req/min).
+O throttle global no SpotifyClient garante intervalo mínimo entre chamadas.
 
 Como o spotipy é síncrono, usamos asyncio.to_thread() para rodar cada
 chamada HTTP numa thread separada sem bloquear o event loop.
@@ -49,8 +49,8 @@ async def _search_one(
         else:
             print(f"  [{index}/{total}] [--] {name} - {artist}")
 
-        # Pequeno delay entre buscas individuais para não estourar rate limit
-        await asyncio.sleep(ASYNC_BATCH_DELAY / ASYNC_CONCURRENCY)
+        # Delay adicional entre tarefas (o throttle global já controla o mínimo)
+        await asyncio.sleep(ASYNC_BATCH_DELAY)
         return result
 
 

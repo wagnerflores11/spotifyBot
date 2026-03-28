@@ -27,11 +27,11 @@ SPOTIFY_SCOPES = (
 MAX_PLAYLIST_SIZE = 50
 SPOTIFY_BATCH_DELETE = 20
 SPOTIFY_BATCH_ADD = 100
-SEARCH_DELAY_SECONDS = 1.5
-RATE_LIMIT_WAIT_SECONDS = 30
-MIN_TRACKS_FOR_PLAYLIST = 5
-ASYNC_CONCURRENCY = 5          # buscas simultâneas no Spotify
-ASYNC_BATCH_DELAY = 1.0        # delay entre lotes (respeitar rate limit)
+RATE_LIMIT_WAIT_SECONDS = 35   # delay ao receber 429 (acima do rolling window de 30s)
+MIN_TRACKS_FOR_PLAYLIST = 30
+ASYNC_CONCURRENCY = 2          # buscas simultâneas — conservador para dev apps
+ASYNC_BATCH_DELAY = 2.0        # delay entre buscas (1.0s por busca = 60 req/min max)
+REQUEST_MIN_INTERVAL = 0.8     # intervalo mínimo entre qualquer chamada à API
 
 # --- Caminhos ---
 HISTORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "history.json")

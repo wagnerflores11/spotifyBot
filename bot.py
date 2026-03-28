@@ -36,8 +36,8 @@ def menu() -> str:
 
 def _ask_songs() -> Optional[str]:
     """Pede músicas de referência ao usuário."""
-    print("\nDigite as musicas de referencia separadas por virgula.")
-    print("Exemplo: veigh talvez voce precise de mim, hungria amor e fe, orochi liberdade\n")
+    print("\nDigite as musicas de referencia separadas por virgula (pode ser quantas quiser).")
+    print("Exemplo: rubel quando bate aquela saudade, anavitoria lisboa, fresno milonga\n")
     user_input = input("Suas musicas: ").strip()
     if not user_input:
         print("Nenhuma musica informada.")
