@@ -34,16 +34,66 @@ class SpotifyClient:
 
     def __init__(self) -> None:
         try:
-            auth_manager = SpotifyOAuth(
+            self._auth_manager = SpotifyOAuth(
                 client_id=SPOTIFY_CLIENT_ID,
                 client_secret=SPOTIFY_CLIENT_SECRET,
                 redirect_uri=SPOTIFY_REDIRECT_URI,
                 scope=SPOTIFY_SCOPES,
             )
-            self.sp = spotipy.Spotify(auth_manager=auth_manager)
+            self._ensure_token()
+            self.sp = spotipy.Spotify(auth_manager=self._auth_manager)
             self._setup_retry()
         except Exception as exc:
             raise AuthenticationError(f"Falha na autenticacao: {exc}") from exc
+
+    def _ensure_token(self) -> None:
+        """Garante que o token em cache está válido e com os scopes corretos.
+
+        Se o token expirou, renova via refresh_token sem abrir o browser.
+        Se o cache tem scopes errados (ex: subset), corrige o campo scope.
+        """
+        import json
+        import requests as _requests
+
+        cache_path = self._auth_manager.cache_handler.cache_path
+        try:
+            with open(cache_path) as f:
+                cached = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return  # Sem cache — SpotifyOAuth vai pedir autenticacao normalmente
+
+        refresh_token = cached.get("refresh_token")
+        if not refresh_token:
+            return
+
+        # Verifica se o token expirou ou se o scope esta incompleto
+        token_expired = time.time() >= cached.get("expires_at", 0)
+        cached_scopes = set(cached.get("scope", "").split())
+        required_scopes = set(SPOTIFY_SCOPES.split())
+        scope_mismatch = not required_scopes.issubset(cached_scopes)
+
+        if token_expired or scope_mismatch:
+            logger.info("Renovando token Spotify (expirado=%s, scope_mismatch=%s)", token_expired, scope_mismatch)
+            resp = _requests.post(
+                "https://accounts.spotify.com/api/token",
+                data={"grant_type": "refresh_token", "refresh_token": refresh_token},
+                auth=(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET),
+                timeout=15,
+            )
+            if resp.status_code == 200:
+                new = resp.json()
+                cached["access_token"] = new["access_token"]
+                cached["expires_in"] = new.get("expires_in", 3600)
+                cached["expires_at"] = int(time.time()) + new.get("expires_in", 3600)
+                cached["token_type"] = new.get("token_type", "Bearer")
+                cached["scope"] = new.get("scope", " ".join(required_scopes))
+                if "refresh_token" in new:
+                    cached["refresh_token"] = new["refresh_token"]
+                with open(cache_path, "w") as f:
+                    json.dump(cached, f)
+                logger.info("Token renovado com sucesso.")
+            else:
+                logger.warning("Falha ao renovar token: %s", resp.text)
 
     def _setup_retry(self) -> None:
         """Configura retry para erros de servidor (5xx), mas NAO para 429.
