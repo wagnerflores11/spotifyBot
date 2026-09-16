@@ -45,3 +45,13 @@ class Recommendation:
     @property
     def is_empty(self) -> bool:
         return len(self.songs) == 0
+
+
+@dataclass
+class BuildResult:
+    """Resultado da montagem de uma playlist — usado para registrar o histórico."""
+
+    url: str
+    title: str
+    genre: str
+    track_count: int

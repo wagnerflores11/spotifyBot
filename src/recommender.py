@@ -6,7 +6,7 @@ from typing import Optional
 
 from openai import OpenAI
 
-from src.config import MAX_PLAYLIST_SIZE, OPENAI_API_KEY
+from src.config import MAX_PLAYLIST_SIZE, OPENAI_API_KEY, OPENAI_MODEL
 from src.exceptions import AIError
 from src.models import Recommendation
 
@@ -140,7 +140,7 @@ def _call_ai(messages: list[dict[str, str]], temperature: float = 0.3) -> str:
     """Faz uma chamada à API da OpenAI e retorna o conteúdo."""
     try:
         response = _get_client().chat.completions.create(
-            model="gpt-4o",
+            model=OPENAI_MODEL,
             messages=messages,
             temperature=temperature,
             max_tokens=8192,

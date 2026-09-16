@@ -5,7 +5,6 @@ import io
 import logging
 from typing import Optional
 
-import requests
 from openai import OpenAI
 from PIL import Image
 
@@ -61,9 +60,9 @@ def generate_cover(genre: str, title: str) -> Optional[str]:
             size="1024x1024",
             quality="standard",
             n=1,
+            response_format="b64_json",
         )
-        image_url = response.data[0].url
-        image_data = requests.get(image_url, timeout=30).content
+        image_data = base64.b64decode(response.data[0].b64_json)
         return _compress_to_base64(image_data)
 
     except Exception as exc:

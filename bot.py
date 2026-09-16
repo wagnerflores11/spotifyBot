@@ -4,7 +4,7 @@ import sys
 from typing import Optional
 
 from src.config import setup_logging, validate_config
-from src.exceptions import ConfigError, SpotifyBotError
+from src.exceptions import SpotifyBotError
 from src.history import add_entry, export_playlist_to_txt, get_entries
 from src.models import Playlist, Track
 from src.playlist_builder import build_playlist
@@ -77,13 +77,13 @@ def handle_create_playlist(spotify: SpotifyClient) -> None:
     user_input = _ask_songs()
     if not user_input:
         return
-    url = build_playlist(spotify, user_input, destination="new")
-    if url:
+    result = build_playlist(spotify, user_input, destination="new")
+    if result:
         add_entry(
-            name=f"DJ Waguinho",
-            url=url,
-            genre="",
-            track_count=0,
+            name=result.title,
+            url=result.url,
+            genre=result.genre,
+            track_count=result.track_count,
             reference_songs=user_input,
         )
 
@@ -113,7 +113,8 @@ def handle_add_to_playlist(spotify: SpotifyClient) -> None:
         if len(parts) == 2:
             result = spotify.search_track(parts[0].strip(), parts[1].strip())
         else:
-            result = spotify.search_track(song, "")
+            # Sem separador: busca livre pelo texto (evita query "artist:" vazia).
+            result = spotify.search_direct(song)
 
         if result:
             found_tracks.append(result)

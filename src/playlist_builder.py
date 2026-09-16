@@ -6,7 +6,7 @@ from typing import Optional
 from src.async_search import search_tracks_parallel
 from src.config import MIN_TRACKS_FOR_PLAYLIST
 from src.cover_generator import generate_cover
-from src.models import Playlist, Track
+from src.models import BuildResult, Playlist, Track
 from src.recommender import recommend_songs
 from src.spotify_client import SpotifyClient
 
@@ -53,7 +53,7 @@ def build_playlist(
     user_input: str,
     destination: str = "new",
     target_playlist: Optional[Playlist] = None,
-) -> Optional[str]:
+) -> Optional[BuildResult]:
     """Fluxo completo: busca referencias → IA recomenda → busca paralela → cria playlist."""
 
     # 1. Busca as musicas de referencia do usuario PRIMEIRO
@@ -105,7 +105,12 @@ def build_playlist(
         print(f"Adicionando {len(final_tracks)} musicas em '{target_playlist.name}'...")
         spotify.add_to_playlist(target_playlist.id, track_uris)
         print(f"\nPronto! Musicas adicionadas. {target_playlist.url}")
-        return target_playlist.url
+        return BuildResult(
+            url=target_playlist.url,
+            title=target_playlist.name,
+            genre=recommendation.genre,
+            track_count=len(final_tracks),
+        )
 
     # Criar nova playlist
     title = f"DJ Waguinho - {recommendation.genre}" if recommendation.genre else "DJ Waguinho"
@@ -115,4 +120,9 @@ def build_playlist(
     print(f"Criando playlist '{title}' com {len(final_tracks)} musicas...")
     url = spotify.create_playlist(title, track_uris, cover_base64=cover)
     print(f"\nPlaylist criada! {url}")
-    return url
+    return BuildResult(
+        url=url,
+        title=title,
+        genre=recommendation.genre,
+        track_count=len(final_tracks),
+    )

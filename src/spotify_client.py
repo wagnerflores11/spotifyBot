@@ -285,7 +285,12 @@ class SpotifyClient:
         cover_base64: Optional[str] = None,
         description: str = "Criada pelo SpotifyBot",
     ) -> str:
-        """Cria uma playlist e retorna a URL."""
+        """Cria uma playlist e retorna a URL.
+
+        Usa o endpoint `me/playlists` via _post. O método público
+        `user_playlist_create` do spotipy chama `users/{id}/playlists`, que
+        retorna 403 Forbidden para este app — por isso mantemos `me/playlists`.
+        """
         self._throttle()
         payload = {"name": name, "public": False, "description": description}
         response = self.sp._post("me/playlists", payload=payload)

@@ -24,12 +24,3 @@ class AIError(SpotifyBotError):
 
     def __init__(self, message: str = "Erro ao consultar a IA"):
         super().__init__(message)
-
-
-class ConfigError(SpotifyBotError):
-    """Configuração ausente ou inválida."""
-
-    def __init__(self, missing_keys: list[str]):
-        keys = ", ".join(missing_keys)
-        super().__init__(f"Variaveis de ambiente obrigatorias ausentes: {keys}")
-        self.missing_keys = missing_keys

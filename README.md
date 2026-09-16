@@ -75,7 +75,11 @@ SPOTIFY_CLIENT_ID=seu_client_id
 SPOTIFY_CLIENT_SECRET=seu_client_secret
 SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
 OPENAI_API_KEY=sua_chave_openai
+# Opcional — modelo de recomendacao (padrao: gpt-4o). Ex.: gpt-4o-mini reduz custo.
+OPENAI_MODEL=gpt-4o
 ```
+
+> Dica: copie o `.env.example` como ponto de partida.
 
 ### 4. Configure o Spotify Developer
 
@@ -151,6 +155,16 @@ spotifyBot/
 
 ---
 
+## Testes
+
+```bash
+pip install -r requirements-dev.txt
+ruff check .   # lint (erros reais)
+pytest -q      # testes das funcoes puras
+```
+
+---
+
 ## Licenca
 
-Este projeto e de uso pessoal.
+Distribuido sob a licenca [MIT](LICENSE).
