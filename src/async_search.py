@@ -13,7 +13,7 @@ import logging
 import time
 from typing import Optional
 
-from src.config import ASYNC_BATCH_DELAY, ASYNC_CONCURRENCY, RATE_LIMIT_WAIT_SECONDS
+from src.config import ASYNC_CONCURRENCY, RATE_LIMIT_WAIT_SECONDS
 from src.exceptions import RateLimitError
 from src.models import Track
 from src.spotify_client import SpotifyClient
@@ -49,8 +49,9 @@ async def _search_one(
         else:
             print(f"  [{index}/{total}] [--] {name} - {artist}")
 
-        # Delay adicional entre tarefas (o throttle global já controla o mínimo)
-        await asyncio.sleep(ASYNC_BATCH_DELAY)
+        # Sem sleep extra aqui: o throttle global do SpotifyClient
+        # (REQUEST_MIN_INTERVAL) já garante o intervalo mínimo entre chamadas.
+        # A concorrência serve para sobrepor a latência de rede das buscas.
         return result
 
 

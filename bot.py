@@ -54,7 +54,7 @@ def _select_playlist(spotify: SpotifyClient) -> Optional[Playlist]:
 
     print(f"\nSuas playlists ({len(playlists)}):\n")
     for i, pl in enumerate(playlists, 1):
-        print(f"  {i}. {pl.name} ({pl.total} musicas)")
+        print(f"  {i}. {pl.name}{pl.count_label}")
 
     while True:
         sel = input("\nDigite o numero da playlist (ou 0 para voltar): ").strip()
@@ -139,7 +139,7 @@ def handle_my_playlists(spotify: SpotifyClient) -> None:
 
     print(f"\nSuas playlists ({len(playlists)}):\n")
     for i, pl in enumerate(playlists, 1):
-        print(f"  {i}. {pl.name} ({pl.total} musicas)")
+        print(f"  {i}. {pl.name}{pl.count_label}")
         print(f"     {pl.url}")
 
 

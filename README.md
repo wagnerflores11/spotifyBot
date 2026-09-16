@@ -36,7 +36,7 @@ Voce diz: "veigh talvez voce precise de mim, hungria preta e hungria amor e fe"
 
     ↓ IA identifica o genero (rap/trap brasileiro)
     ↓ Sugere 50 musicas do MESMO estilo
-    ↓ Busca paralela no Spotify (asyncio, 5x mais rapido)
+    ↓ Busca concorrente no Spotify (asyncio, respeitando o rate limit)
     ↓ Gera capa com DALL-E 3
     ↓ Cria a playlist na sua conta
 
