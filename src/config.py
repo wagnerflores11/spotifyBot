@@ -29,9 +29,8 @@ SPOTIFY_BATCH_DELETE = 20
 SPOTIFY_BATCH_ADD = 100
 RATE_LIMIT_WAIT_SECONDS = 35   # delay ao receber 429 (acima do rolling window de 30s)
 MIN_TRACKS_FOR_PLAYLIST = 30
-ASYNC_CONCURRENCY = 2          # buscas simultâneas — conservador para dev apps
-ASYNC_BATCH_DELAY = 2.0        # delay entre buscas (1.0s por busca = 60 req/min max)
-REQUEST_MIN_INTERVAL = 0.8     # intervalo mínimo entre qualquer chamada à API
+ASYNC_CONCURRENCY = 3          # buscas simultâneas — sobrepõem a latência de rede
+REQUEST_MIN_INTERVAL = 0.8     # intervalo mínimo entre qualquer chamada à API (throttle global)
 
 # --- Caminhos ---
 HISTORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "history.json")

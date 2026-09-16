@@ -22,12 +22,17 @@ class Playlist:
 
     id: str
     name: str
-    total: int = 0
+    total: Optional[int] = None  # None quando a API não informa a contagem
     url: str = ""
+
+    @property
+    def count_label(self) -> str:
+        """Sufixo '(N musicas)' apenas quando a contagem é conhecida."""
+        return f" ({self.total} musicas)" if self.total is not None else ""
 
     def display(self, index: int = 0) -> str:
         prefix = f"  {index}. " if index else ""
-        return f"{prefix}{self.name} ({self.total} musicas)"
+        return f"{prefix}{self.name}{self.count_label}"
 
 
 @dataclass

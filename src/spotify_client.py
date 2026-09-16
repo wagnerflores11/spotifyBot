@@ -240,10 +240,13 @@ class SpotifyClient:
 
         while results:
             for item in results["items"]:
+                # A API de listagem pode devolver "tracks" como null — nesse caso
+                # a contagem é desconhecida (None), não zero.
+                tracks_info = item.get("tracks") or {}
                 playlists.append(Playlist(
                     id=item["id"],
                     name=item["name"],
-                    total=item.get("tracks", {}).get("total", 0),
+                    total=tracks_info.get("total"),
                     url=item.get("external_urls", {}).get("spotify", ""),
                 ))
             if results.get("next"):
@@ -261,7 +264,7 @@ class SpotifyClient:
 
         while results:
             for item in results["items"]:
-                t = item.get("track")
+                t = item.get("track") or item.get("item")
                 if t and t.get("uri"):
                     tracks.append(Track(
                         uri=t["uri"],
